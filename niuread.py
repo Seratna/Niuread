@@ -104,12 +104,12 @@ class NiureadRecommender(object):
         score = np.max(p, axis=0)
 
         recommendations = []
-        date = datetime.datetime.today().strftime("%Y-%m-%d")
+        tmr = datetime.datetime.today() + datetime.timedelta(1)
         for i in range(num_users):
             entry = (0,
                      users.iloc[i][self.ATTR_USER_INFO_ID],
                      books.iloc[prediction[i]][self.ATTR_BOOK_INFO_ID],
-                     date,
+                     tmr.strftime("%Y-%m-%d"),
                      score[i])
             recommendations.append(entry)
         print(recommendations)
