@@ -27,7 +27,7 @@ class NiureadRecommender(object):
     REGULATION_LAMBDA = 0.5
     NUM_ITERATION = 100
 
-    DOUBAN_WEIGHT = 5
+    # DOUBAN_WEIGHT = 5
 
     def __init__(self):
         """
@@ -85,21 +85,23 @@ class NiureadRecommender(object):
         # TODO calculate y_mean according to user rating and douban rating
         all_douban = np.array(books['doubanScore'])
         valid_douban = (all_douban-1)/9*4 + 1  # scale
-        valid_douban[all_douban<1] = 0
-        valid_douban[all_douban == np.nan] = 0
+        valid_douban[valid_douban<1] = 0
+        valid_douban[np.isnan(valid_douban)] = 0
+        valid_douban[valid_douban<=0] = 2.5
         valid_douban = valid_douban.reshape((-1, 1))
-        mean = (valid_douban*self.DOUBAN_WEIGHT + y_mean)/(self.DOUBAN_WEIGHT+1)
+
+        mean = y_mean + valid_douban*(y_mean<=0)
 
         # generate prediction
         p = x.dot(theta.T) + mean.dot(np.ones((1, num_users)))
 
+        print(y_mean[633, 0])
+        print(valid_douban[633, 0])
         # generate recommendation
         p[indexed_recommendation[:, 0], indexed_recommendation[:, 1]] = 0
         p[indexed_rating[:, 0], indexed_rating[:, 1]] = 0
         prediction = np.argmax(p, axis=0)
         score = np.max(p, axis=0)
-        # print(prediction)
-        # print(score)
 
         recommendations = []
         date = datetime.datetime.today().strftime("%Y-%m-%d")
